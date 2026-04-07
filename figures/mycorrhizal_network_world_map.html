@@ -1,0 +1,153 @@
+
+<div id="map" style="width: 100%;"></div>
+<div id="legend" style="display: flex; flex-wrap: wrap; gap: 16px; margin: 12px 0 0; font-size: 12px; color: var(--color-text-secondary);"></div>
+<div id="info" style="margin-top: 8px; font-size: 13px; color: var(--color-text-secondary); min-height: 20px;"></div>
+<div style="margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap;">
+  <button onclick="filterPathway('all')">All channels</button>
+  <button onclick="filterPathway('faith')">Faith mycorrhiza</button>
+  <button onclick="filterPathway('force')">Force mycorrhiza</button>
+  <button onclick="filterPathway('contagion')">Contagion mycorrhiza</button>
+  <button onclick="filterPathway('arabic')">Arabic network</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+const flows = [
+  {donor:"Chinese",recipient:"Japanese",count:647,d_lat:35,d_lon:105,r_lat:37,r_lon:140,pathway:"contagion"},
+  {donor:"Hungarian",recipient:"Selice Romani",count:622,d_lat:47.5,d_lon:19,r_lat:48.09,r_lon:17.96,pathway:"contagion"},
+  {donor:"Classical Arabic",recipient:"Tarifiyt Berber",count:567,d_lat:24,d_lon:45,r_lat:34.5,r_lon:-4,pathway:"faith"},
+  {donor:"Spanish",recipient:"Yaqui",count:401,d_lat:40.4,d_lon:-3.7,r_lat:27.5,r_lon:-110.25,pathway:"force"},
+  {donor:"Spanish",recipient:"Imbabura Quechua",count:377,d_lat:40.4,d_lon:-3.7,r_lat:0.33,r_lon:-78,pathway:"force"},
+  {donor:"Sanskrit",recipient:"Thai",count:362,d_lat:25,d_lon:82,r_lat:16,r_lon:101,pathway:"faith"},
+  {donor:"Latin",recipient:"English",count:349,d_lat:41.9,d_lon:12.5,r_lat:52,r_lon:0,pathway:"faith"},
+  {donor:"Malay",recipient:"Ceq Wong",count:343,d_lat:3.1,d_lon:101.7,r_lat:3.88,r_lon:102.46,pathway:"contagion"},
+  {donor:"Arabic",recipient:"Swahili",count:315,d_lat:24,d_lon:45,r_lat:-6.5,r_lon:39,pathway:"faith"},
+  {donor:"Chinese",recipient:"Vietnamese",count:302,d_lat:35,d_lon:105,r_lat:10.5,r_lon:106.5,pathway:"contagion"},
+  {donor:"Portuguese",recipient:"Saramaccan",count:280,d_lat:5.8,d_lon:-55.2,r_lat:4.5,r_lon:-55.5,pathway:"force"},
+  {donor:"Russian",recipient:"Sakha",count:279,d_lat:55.8,d_lon:37.6,r_lat:62,r_lon:130,pathway:"force"},
+  {donor:"Spanish",recipient:"Mapudungun",count:259,d_lat:40.4,d_lon:-3.7,r_lat:-38,r_lon:-72,pathway:"force"},
+  {donor:"Spanish",recipient:"Otomi",count:253,d_lat:40.4,d_lon:-3.7,r_lat:20.17,r_lon:-98.83,pathway:"force"},
+  {donor:"English",recipient:"Takia",count:253,d_lat:52,d_lon:0,r_lat:-4.67,r_lon:146,pathway:"force"},
+  {donor:"Mongolic",recipient:"Sakha",count:240,d_lat:47.9,d_lon:106.9,r_lat:62,r_lon:130,pathway:"contagion"},
+  {donor:"Slavic",recipient:"Romanian",count:236,d_lat:50,d_lon:20,r_lat:46,r_lon:25,pathway:"contagion"},
+  {donor:"Russian",recipient:"Kildin Saami",count:234,d_lat:55.8,d_lon:37.6,r_lat:67,r_lon:37,pathway:"force"},
+  {donor:"Spanish",recipient:"Tzotzil",count:234,d_lat:40.4,d_lon:-3.7,r_lat:16.83,r_lon:-92.83,pathway:"force"},
+  {donor:"Arabic",recipient:"Hausa",count:221,d_lat:24,d_lon:45,r_lat:12,r_lon:7,pathway:"faith"},
+  {donor:"Arabic",recipient:"Kanuri",count:211,d_lat:24,d_lon:45,r_lat:12,r_lon:13,pathway:"faith"},
+  {donor:"Spanish",recipient:"Qeqchi",count:205,d_lat:40.4,d_lon:-3.7,r_lat:16,r_lon:-89.83,pathway:"force"},
+  {donor:"English",recipient:"Hawaiian",count:201,d_lat:52,d_lon:0,r_lat:19.58,r_lon:-155.5,pathway:"force"},
+  {donor:"French",recipient:"Romanian",count:198,d_lat:48.8,d_lon:2.3,r_lat:46,r_lon:25,pathway:"contagion"},
+  {donor:"Spanish",recipient:"Wichi",count:197,d_lat:40.4,d_lon:-3.7,r_lat:-22.5,r_lon:-62.58,pathway:"force"},
+  {donor:"Sanskrit",recipient:"Indonesian",count:195,d_lat:25,d_lon:82,r_lat:0,r_lon:106,pathway:"faith"},
+  {donor:"German",recipient:"Lower Sorbian",count:173,d_lat:50.1,d_lon:8.7,r_lat:51.75,r_lon:14.33,pathway:"force"},
+  {donor:"Latin",recipient:"Romanian",count:172,d_lat:41.9,d_lon:12.5,r_lat:46,r_lon:25,pathway:"faith"},
+  {donor:"Dutch",recipient:"Saramaccan",count:164,d_lat:52.5,d_lon:6,r_lat:4.5,r_lon:-55.5,pathway:"force"},
+  {donor:"Avar",recipient:"Bezhta",count:161,d_lat:42.5,d_lon:46.5,r_lat:42.08,r_lon:46.17,pathway:"contagion"},
+  {donor:"Chinese",recipient:"White Hmong",count:158,d_lat:35,d_lon:105,r_lat:26,r_lon:105,pathway:"contagion"},
+  {donor:"French",recipient:"Seychelles Creole",count:156,d_lat:48.8,d_lon:2.3,r_lat:-4.75,r_lon:55.5,pathway:"contagion"},
+  {donor:"Arabic",recipient:"Indonesian",count:120,d_lat:24,d_lon:45,r_lat:0,r_lon:106,pathway:"faith"},
+  {donor:"Arabic",recipient:"Bezhta",count:69,d_lat:24,d_lon:45,r_lat:42.08,r_lon:46.17,pathway:"faith"},
+  {donor:"Arabic",recipient:"Archi",count:67,d_lat:24,d_lon:45,r_lat:42.17,r_lon:46.93,pathway:"faith"},
+  {donor:"Arabic",recipient:"Japanese",count:5,d_lat:24,d_lon:45,r_lat:37,r_lon:140,pathway:"faith"},
+  {donor:"Arabic",recipient:"English",count:8,d_lat:24,d_lon:45,r_lat:52,r_lon:0,pathway:"faith"},
+  {donor:"Arabic",recipient:"Romanian",count:10,d_lat:24,d_lon:45,r_lat:46,r_lon:25,pathway:"faith"},
+  {donor:"Arabic",recipient:"Malagasy",count:13,d_lat:24,d_lon:45,r_lat:-18.9,r_lon:47.5,pathway:"faith"},
+];
+
+const isDark = matchMedia('(prefers-color-scheme:dark)').matches;
+const pathwayColors = {faith:'#7F77DD',force:'#D85A30',contagion:'#1D9E75'};
+
+const legendEl = document.getElementById('legend');
+legendEl.innerHTML = [
+  ['Faith mycorrhiza (religion/learning)','#7F77DD'],
+  ['Force mycorrhiza (conquest/colonization)','#D85A30'],
+  ['Contagion mycorrhiza (trade/contact)','#1D9E75']
+].map(([l,c])=>`<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${c}"></span>${l}</span>`).join('');
+
+const W=900,H=480;
+const svg = d3.select('#map').append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('width','100%');
+const proj = d3.geoNaturalEarth1().scale(150).translate([W/2,H/2+20]);
+const path = d3.geoPath(proj);
+
+d3.json('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json').then(world=>{
+  svg.append('g').selectAll('path')
+    .data(topojson.feature(world,world.objects.countries).features).join('path')
+    .attr('d',path)
+    .attr('fill',isDark?'#2C2C2A':'#F1EFE8')
+    .attr('stroke',isDark?'rgba(255,255,255,.1)':'rgba(0,0,0,.08)')
+    .attr('stroke-width',0.5);
+
+  const lineG = svg.append('g').attr('class','lines');
+  const nodeG = svg.append('g').attr('class','nodes');
+  drawFlows('all');
+});
+
+function drawFlows(filter){
+  const lineG = svg.select('.lines');
+  const nodeG = svg.select('.nodes');
+  lineG.selectAll('*').remove();
+  nodeG.selectAll('*').remove();
+
+  let ff = flows;
+  if(filter==='arabic') ff = flows.filter(f=>f.donor.includes('Arabic')||f.donor==='Classical Arabic');
+  else if(filter!=='all') ff = flows.filter(f=>f.pathway===filter);
+
+  const maxC = d3.max(ff,d=>d.count)||1;
+
+  ff.forEach(f=>{
+    const [x1,y1]=proj([f.d_lon,f.d_lat]);
+    const [x2,y2]=proj([f.r_lon,f.r_lat]);
+    if(!x1||!x2) return;
+    const mx=(x1+x2)/2, my=(y1+y2)/2-Math.abs(x2-x1)*0.15;
+    const w = 0.5 + (f.count/maxC)*4;
+    const op = 0.15 + (f.count/maxC)*0.55;
+    const col = pathwayColors[f.pathway];
+    lineG.append('path')
+      .attr('d',`M${x1},${y1} Q${mx},${my} ${x2},${y2}`)
+      .attr('fill','none')
+      .attr('stroke',col)
+      .attr('stroke-width',w)
+      .attr('opacity',op)
+      .on('mouseover',function(){
+        d3.select(this).attr('stroke-width',w+2).attr('opacity',1);
+        document.getElementById('info').textContent=`${f.donor} → ${f.recipient}: ${f.count} DNA fragments (${f.pathway})`;
+      })
+      .on('mouseout',function(){
+        d3.select(this).attr('stroke-width',w).attr('opacity',op);
+        document.getElementById('info').textContent='';
+      });
+  });
+
+  const nodeMap = new Map();
+  ff.forEach(f=>{
+    if(!nodeMap.has(f.donor)) nodeMap.set(f.donor,{lat:f.d_lat,lon:f.d_lon,isDonor:true,total:0});
+    if(!nodeMap.has(f.recipient)) nodeMap.set(f.recipient,{lat:f.r_lat,lon:f.r_lon,isDonor:false,total:0});
+    nodeMap.get(f.donor).total+=f.count;
+    nodeMap.get(f.recipient).total+=f.count;
+  });
+
+  nodeMap.forEach((v,k)=>{
+    const [cx,cy]=proj([v.lon,v.lat]);
+    if(!cx) return;
+    const r = 2+Math.sqrt(v.total/50);
+    nodeG.append('circle')
+      .attr('cx',cx).attr('cy',cy).attr('r',Math.min(r,8))
+      .attr('fill',v.isDonor?(isDark?'#AFA9EC':'#534AB7'):(isDark?'#D3D1C7':'#5F5E5A'))
+      .attr('stroke',isDark?'rgba(255,255,255,.3)':'rgba(0,0,0,.2)')
+      .attr('stroke-width',0.5);
+    if(r>3.5){
+      nodeG.append('text')
+        .attr('x',cx).attr('y',cy-Math.min(r,8)-3)
+        .attr('text-anchor','middle')
+        .attr('font-size','9px')
+        .attr('fill',isDark?'#D3D1C7':'#5F5E5A')
+        .text(k);
+    }
+  });
+}
+
+function filterPathway(p){
+  drawFlows(p);
+}
+</script>
