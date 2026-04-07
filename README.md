@@ -1,6 +1,6 @@
 # Language as Genome — Analysis Code
 
-**Paper:** *Language as Genome: Beyond the Family Tree: Historical Corridors Organize Lexical Borrowing Networks*
+**Paper:** *Beyond the Family Tree: Historical Corridors Organize Lexical Borrowing Networks*
 
 **Alternative Title:** *Language as Civilization Fossil: Climate, Food, and Faith as the Three Drivers of Linguistic Evolution*
 
